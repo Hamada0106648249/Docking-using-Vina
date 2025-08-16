@@ -1,0 +1,51 @@
+# Step 1: Upload the ligand and protein files using the Colab file upload feature
+from google.colab import files
+
+# This will prompt you to select the ligand and protein files from your local machine
+uploaded_files = files.upload()
+
+# Check if the files are uploaded successfully
+if 'ligand.pdb' in uploaded_files and 'protein.pdb' in uploaded_files:
+    print("Both ligand and protein files are uploaded successfully.")
+else:
+    print("Please make sure both ligand and protein files are uploaded.")
+
+# Step 2: Install required tools (AutoDock Vina and Open Babel for file conversion)
+!apt-get update
+!apt-get install -y autodock-vina
+!apt-get install -y openbabel
+
+# Step 3: Convert PDB files to PDBQT using Open Babel
+# The conversion might need more parameters depending on the ligand and protein, such as charges and hydrogens
+!obabel -ipdb ligand.pdb -opdbqt -O ligand.pdbqt
+!obabel -ipdb protein.pdb -opdbqt -O protein.pdbqt -xr
+
+# Step 4: Define the docking parameters
+# You will need to replace these parameters with the ones appropriate for your protein and ligand
+center_x, center_y, center_z = 0.0, 0.0, 0.0  # Replace with your active site coordinates
+size_x, size_y, size_z = 20, 20, 20  # Replace with the dimensions of the docking box
+
+# Step 5: Run the docking simulation using AutoDock Vina
+# Construct the command for Vina
+vina_command = f"vina --receptor protein.pdbqt --ligand ligand.pdbqt --center_x {center_x} --center_y {center_y} --center_z {center_z} --size_x {size_x} --size_y {size_y} --size_z {size_z} --out docked_ligand.pdbqt"
+
+# Execute the docking
+!{vina_command}
+
+# Step 6: Check the output
+# List the output files to make sure the docking output was generated
+!ls
+
+# Step 7: Analyze the results (optional here, but usually involves parsing the output file)
+# This would depend on your analysis requirements
+
+
+
+from google.colab import files
+
+# Specify the name of the file you wish to download.
+# In this case, it's the output file from AutoDock Vina.
+output_file_name = 'docked_ligand.pdbqt'
+
+# Download the file to your local system.
+files.download(output_file_name)
